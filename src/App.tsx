@@ -1,34 +1,48 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import { useState } from "react";
+import ExpenseListTable from "./components/ExpenseListTable.js";
+import ExpenseFilter from "./components/ExpenseFilter.js";
+import ExpenseForm from "./components/ExpenseForm.js";
+import { Expense, ExpenseListTableProps } from "./types/interfaces.js";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [selectedCategory, updateSelectedCategory] = useState<string>("");
+  const [expenses, updateExpenses] = useState<Expense[]>([]);
+
+  const handleDelete = (id: number) => {
+    updateExpenses(expenses.filter((exp) => exp.id !== id));
+  };
+
+  const handleSelectedCategory = (category: string) => {
+    updateSelectedCategory(category);
+  };
+
+  const visibleExpenses = selectedCategory
+    ? expenses.filter((expense) => expense.category === selectedCategory)
+    : expenses;
 
   return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <>
+      <div className="mb-5">
+        <ExpenseForm
+          onSubmit={(expense) =>
+            updateExpenses([
+              ...expenses,
+              {
+                ...expense,
+                id: expenses.length + 1,
+              },
+            ])
+          }
+        ></ExpenseForm>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+      <div className="mb-3">
+        <ExpenseFilter onSelect={handleSelectedCategory}></ExpenseFilter>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
-  )
+      {visibleExpenses.length > 0 && (
+        <ExpenseListTable expenses={visibleExpenses} onDelete={handleDelete} />
+      )}
+    </>
+  );
 }
 
-export default App
+export default App;
